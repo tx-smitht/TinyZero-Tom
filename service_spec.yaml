@@ -13,7 +13,7 @@ spec:
       N_GPUS: "2"
       ROLLOUT_TP_SIZE: "2"
       VLLM_ATTENTION_BACKEND: "XFORMERS"
-      BASE_MODEL: "/models/Qwen2.5-3b"
+      BASE_MODEL: "Qwen/Qwen2.5-3B"
       DATA_DIR: "/data"
       EXPERIMENT_NAME: "countdown-qwen2.5-3b"
 

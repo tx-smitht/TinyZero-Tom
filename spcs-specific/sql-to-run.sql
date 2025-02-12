@@ -35,10 +35,26 @@ CREATE COMPUTE POOL tinyzero_compute_pool
   initially_suspended=true;
 GRANT USAGE, MONITOR, modify ON COMPUTE POOL tinyzero_compute_pool TO ROLE sysadmin;
 describe compute pool tinyzero_compute_pool;
-use role accountadmin;
+use role accountadmin; 
 alter compute pool tinyzero_compute_pool suspend;
 alter compute pool tinyzero_compute_pool resume;
 
+USE ROLE ACCOUNTADMIN;
+
+CREATE OR REPLACE NETWORK RULE hf_network_rule 
+  MODE = EGRESS 
+  TYPE = HOST_PORT 
+  VALUE_LIST = (
+    'huggingface.co',
+    'cdn-lfs-us-1.hf.co',
+    'Jiayi-Pan.s3.amazonaws.com'
+  );
+
+CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION hf_access_integration 
+  ALLOWED_NETWORK_RULES = (hf_network_rule)
+  ENABLED = TRUE;
+
+GRANT USAGE ON INTEGRATION hf_access_integration TO ROLE sysadmin;
 
 -- Put service spec into stage with the following command
 -- snowsql then PUT 'file://C:/Users/txsmi/Documents/Local Programming/Snowflake/spcs/TinyZero/service_spec.yaml' @tinyzero_stage AUTO_COMPRESS=FALSE OVERWRITE=TRUE;
@@ -49,7 +65,8 @@ use role sysadmin;
 create service tinyzero_training_service
 IN COMPUTE POOL tinyzero_compute_pool
 FROM @tinyzero_stage
-SPEC='service_spec.yaml';
+SPEC='service_spec.yaml'
+EXTERNAL_ACCESS_INTEGRATIONS = (hf_access_integration);;
 drop service tinyzero_training_service;
 
 describe service tinyzero_training_service;
