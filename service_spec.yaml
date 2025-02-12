@@ -1,0 +1,32 @@
+spec:
+  containers:
+  - name: training-container
+    image: szgqdbu-bhb45377.registry.snowflakecomputing.com/tinyzero/experiment/tinyzero_image_repo/tinyzero_image:latest
+    command: 
+      - "/bin/bash"
+      - "-c"
+      - |
+        python /app/examples/data_preprocess/countdown.py --local_dir /data && \
+        bash /app/scripts/train_tiny_zero.sh
+
+    env:
+      N_GPUS: "2"
+      ROLLOUT_TP_SIZE: "2"
+      VLLM_ATTENTION_BACKEND: "XFORMERS"
+      BASE_MODEL: "/models/Qwen2.5-3b"
+      DATA_DIR: "/data"
+      EXPERIMENT_NAME: "countdown-qwen2.5-3b"
+
+    resources:
+      requests:
+        nvidia.com/gpu: 2
+      limits:
+        nvidia.com/gpu: 2
+
+  volumes:
+  - name: training-data
+    source: "@tinyzero_stage/data"
+  - name: model-store
+    source: "@tinyzero_stage/models"
+
+    
